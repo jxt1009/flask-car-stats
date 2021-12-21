@@ -10,16 +10,10 @@ import plotly
 import plotly.express as px
 import flask
 import json
-import matplotlib
-import matplotlib.pyplot as plt
 import mysql.connector
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import render_template, redirect, url_for, request, Response
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
 import pandas as pd
-
-matplotlib.use('Agg')
 
 mydb = mysql.connector.connect(
 	host="10.0.0.147",
@@ -34,6 +28,7 @@ app = flask.Flask(__name__, static_url_path='',
 app.config["DEBUG"] = True
 mycursor = mydb.cursor()
 
+# Global mapping variables
 voltage_graph = 0
 voltage_graphs = []
 voltage_cutoff_time = ""
@@ -42,14 +37,18 @@ earliest = ""
 latest = ""
 
 
+# Post route to submit voltage to SQL db
 @app.route('/voltage/<voltage>', methods=['GET', 'POST'])
 def post_voltage(voltage):
 	sql = "INSERT INTO voltage (voltage, car_id) VALUES (%s, %s)"
-	val = (voltage, "01")
-	mycursor.execute(sql, val)
-	return "Success"
+	if voltage.isnumeric():
+		val = (voltage, "01")
+		print(mycursor.execute(sql, val))
+		return "Success"
+	return "Invalid request"
 
 
+# Get the chunks of time series data from the SQL db
 def get_voltage_chunks():
 	global earliest
 	global latest
@@ -64,52 +63,61 @@ def get_voltage_chunks():
 	else:
 		mycursor.execute(sql + ";")
 
+	# Go through rows returned from db
 	for i in mycursor:
 		id.append(i[0])
 		voltage.append(i[1])
 		car_id.append(i[2])
 		timestamp.append(i[3])
+
 	chunks = []
-	cur_chunk = pd.DataFrame(columns=["timestamp","id","car_id","voltage",'voltage_avg'])
+	cur_chunk = pd.DataFrame(columns=["timestamp", "id", "car_id", "voltage", 'voltage_avg'])
 	cur_chunk.voltage_avg = 0
+
+	# Save params for web display
 	earliest = timestamp[0]
 	latest = timestamp[-1]
+
+	# Iterate through the entries and transfer them into the dataframe
+	# The voltage interval limit defines the maximum time between readings to separate
+	# the results into individual instances
 	for i in range(1, len(timestamp)):
 		if (timestamp[i] - timestamp[i - 1]).total_seconds() > voltage_interval_limit and i > 1:
-			#print(cur_chunk)
 			cur_chunk['voltage_avg'] = cur_chunk['voltage'].rolling(30).mean()
 			chunks.append(cur_chunk)
 			cur_chunk = cur_chunk[0:0]
 		if i == len(timestamp):
 			chunks.append(cur_chunk)
 
-		cur_chunk=cur_chunk.append({"timestamp":timestamp[i],"id":id[i],"car_id":car_id[i],"voltage":voltage[i]}, ignore_index=True)
+		cur_chunk = cur_chunk.append({"timestamp": timestamp[i],
+									  "id": id[i],
+									  "car_id": car_id[i],
+									  "voltage": voltage[i]},
+									 ignore_index=True)
 	return chunks
 
 
+# Generate HTML graphs with plotly
 def generate_voltage_chart():
 	global voltage_graph
 	global voltage_graphs
 	chunks = get_voltage_chunks()
 	voltage_graphs.clear()
 	for i in range(0, len(chunks)):
-		fig=px.line(chunks[i],x='timestamp',y=['voltage','voltage_avg'])
-		graph_json = plotly.io.to_html(fig,include_plotlyjs=False,full_html=False,default_height=370,default_width="60%")#json.dumps(fig,cls=plotly.utils.PlotlyJSONEncoder)
+		fig = px.line(chunks[i],
+					  x='timestamp',
+					  y=['voltage', 'voltage_avg'])
+
+		graph_json = plotly.io.to_html(fig,
+									   include_plotlyjs=False,
+									   full_html=False,
+									   default_height=370,
+									   default_width="68%")  # json.dumps(fig,cls=plotly.utils.PlotlyJSONEncoder)
+
 		voltage_graphs.append(graph_json)
-		# plt.title("Period from "+chunks[i]["timestamp"][0].strftime("%d %b, %y %H:%M:%S") + ". Duration: " + str(chunks[i]["timestamp"][-1]-chunks[i]["timestamp"][0]))
 
 
-
-@app.route("/voltage.png")
-def voltage_png():
-	return Response(voltage_graph)
-
-
-@app.route("/voltage<value>.png")
-def voltage_charts(value):
-	return Response(voltage_graphs[value])
-
-
+# Display the homepage
 @app.route("/")
 def homepage():
 	return render_template("index.html",
@@ -120,32 +128,17 @@ def homepage():
 						   voltage_cutoff_time=voltage_cutoff_time)
 
 
-def schedule_function(function, delay):
+# Basically a cron job, also runs the job once before adding it
+def schedule_function(function, delay_seconds):
 	function()
-	scheduler = BackgroundScheduler({'apscheduler.job_defaults.max_instances': 2},timezone='UTC')
-	scheduler.add_job(func=function, trigger="interval", seconds=delay)
+	scheduler = BackgroundScheduler({'apscheduler.job_defaults.max_instances': 2}, timezone='UTC')
+	scheduler.add_job(func=function, trigger="interval", seconds=delay_seconds)
 	scheduler.start()
 
 	# Shut down the scheduler when exiting the app
 	atexit.register(lambda: scheduler.shutdown())
 
 
-@app.route('/adjust-cutoff/', methods=['POST', 'GET'])
-def adjust_voltage_cutoff():
-	global voltage_cutoff_time, voltage_interval_limit
-	if request.method == 'POST':
-		form_data = request.form
-		cutoff = form_data["cutoff-time"]
-		interval = form_data["interval-limit"]
-		if cutoff != "":
-			voltage_cutoff_time = cutoff
-		if interval != '' and interval.isnumeric():
-			voltage_interval_limit = int(interval)
-		generate_voltage_chart()
-	return redirect(url_for('homepage'))
-
-
 if __name__ == '__main__':
-
 	schedule_function(generate_voltage_chart, 5)
 	app.run(host='0.0.0.0', port=80)
