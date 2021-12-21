@@ -1,22 +1,66 @@
 <html>
 <h1>
-	Test
+	Voltage Status
 </h1>
 <head>
 	<title>{{ title }}</title>
 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script>
+		$(document).ready(function() {
+			$("#chart-container").load("/get-charts");  
+			console.log($('#hour-select').val('{{cutoff}}'));
+			$('hour-select').val('{{cutoff}}').attr('selected', true);
+    		setInterval(function() {
+        		$("#chart-container").load("/get-charts");    
+    		}, 3000);
+		});
+	</script>
 	<style>
 		input, label {
 			display:block;
 		}
+		#page-container {
+		  position: relative;
+		  min-height: 100vh;
+		}
+
+		#content-wrap {
+		  padding-bottom: 2.5rem;    /* Footer height */
+		}
+
+		#footer {
+		  position: absolute;
+		  bottom: 0;
+		  width: 100%;
+		  height: 2.5rem;            /* Footer height */
+		}
 	</style>
 </head>
 <body>
-	<div id="chart-container"></div>
-	{% for i in voltage_graphs %}
-		{{i|safe}}
-	{% endfor %}
-</ul>
+	<div id="page-container">
+		<form name="timestamp-select" method="POST" action="/adjust-cutoff/">
+			<label>Current Range:<br/>From {{earliest}} to {{latest}}</label>
+			<br/>
+			<label>
+				<select name="hour-select" id="hour-select">
+				  <option value="5m">5 m</option>
+				  <option value="10m">10 m</option>
+				  <option value="30m">30 m</option>
+				  <option value="1">1 hr</option>
+				  <option value="2">2 hr</option>
+				  <option value="4">4 hr</option>
+				  <option value="8">8 hr</option>
+				  <option value="12">12 hr</option>
+				</select>
+			</label>
+			<br/>
+			<input type="submit"/>
+		</form>
+		<div id="chart-container"></div>
+	</div>
 </body>
+<footer id="footer">
+	<a href="https://github.com/jxt1009/flask-car-stats">Github</a>
+</footer>
 </html>
