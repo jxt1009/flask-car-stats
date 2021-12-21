@@ -1,0 +1,37 @@
+<html>
+<h1>
+	Test
+</h1>
+<head>
+	<title>{{ title }}</title>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<style>
+		input, label {
+			display:block;
+		}
+	</style>
+</head>
+<body>
+	<form name="timestamp-select" method="POST" action="/adjust-cutoff/">
+		<label>
+			Current Range: {{earliest}} to {{latest}}
+			<input type="datetime-local" name="cutoff-time" 
+			{% if voltage_cutoff_time %}
+				value="{{voltage_cutoff_time}}"
+			{% endif %}
+			/>
+		</label>
+		<label>
+			Interval Gap To Split Charts (in seconds)
+			<input type="number" name="interval-limit" min="10" max="6000">
+		</label>
+		<input type="submit"/>
+	</form>
+	<div id="chart-container"></div>
+	{% for i in voltage_graphs %}
+	{{i|safe}}
+	{% endfor %}
+</ul>
+</body>
+</html>
