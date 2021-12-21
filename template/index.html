@@ -9,11 +9,11 @@
 	<script>
 		$(document).ready(function() {
 			$("#chart-container").load("/get-charts");  
-			console.log($('#hour-select').val('{{cutoff}}'));
 			$('hour-select').val('{{cutoff}}').attr('selected', true);
     		setInterval(function() {
+        		$("#chart-container").innerHTML="";   
         		$("#chart-container").load("/get-charts");    
-    		}, 3000);
+    		}, 10000);
 		});
 	</script>
 	<style>
@@ -21,28 +21,36 @@
 			display:block;
 		}
 		#page-container {
-		  position: relative;
-		  min-height: 100vh;
+		 	position: relative;
+		 	min-height: calc(100vh - 100px);
 		}
 
 		#content-wrap {
-		  padding-bottom: 2.5rem;    /* Footer height */
 		}
 
 		#footer {
-		  position: absolute;
-		  bottom: 0;
-		  width: 100%;
-		  height: 2.5rem;            /* Footer height */
+		 	position: relative;
+		 	width: 100%;           /* Footer height */
+		 	height: 10px;
+		}
+		.modebar{
+		    display: none !important;
 		}
 	</style>
 </head>
 <body>
 	<div id="page-container">
+		<div id="chart-container"></div>
 		<form name="timestamp-select" method="POST" action="/adjust-cutoff/">
-			<label>Current Range:<br/>From {{earliest}} to {{latest}}</label>
+			<label>
+				Current Range:
+				<br/>
+				From {{earliest}} to {{latest}}
+			</label>
 			<br/>
 			<label>
+				Duration Select:
+				<br/>
 				<select name="hour-select" id="hour-select">
 				  <option value="5m">5 m</option>
 				  <option value="10m">10 m</option>
@@ -57,7 +65,6 @@
 			<br/>
 			<input type="submit"/>
 		</form>
-		<div id="chart-container"></div>
 	</div>
 </body>
 <footer id="footer">

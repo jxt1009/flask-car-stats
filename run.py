@@ -35,7 +35,7 @@ voltage_graphs = []
 voltage_cutoff_time = 10
 voltage_interval_limit = 200
 voltage_cutoff_name = "10m"
-voltage_scaling_factor = 14/2.961
+voltage_scaling_factor = 15/2.961
 earliest = ""
 latest = ""
 
@@ -179,6 +179,6 @@ def schedule_function(function, delay_seconds):
 
 
 if __name__ == '__main__':
-	schedule_function(generate_voltage_chart, 5)
+	schedule_function(generate_voltage_chart, 10)
 	schedule_function(prune_sql, 1*60*60)
 	app.run(host='0.0.0.0', port=80)
