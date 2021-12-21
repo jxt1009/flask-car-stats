@@ -94,7 +94,7 @@ def generate_voltage_chart():
 	voltage_graphs.clear()
 	for i in range(0, len(chunks)):
 		fig=px.line(chunks[i],x='timestamp',y=['voltage','voltage_avg'])
-		graph_json = plotly.io.to_html(fig,include_plotlyjs=False,full_html=False,default_height=300)#json.dumps(fig,cls=plotly.utils.PlotlyJSONEncoder)
+		graph_json = plotly.io.to_html(fig,include_plotlyjs=False,full_html=False,default_height=370,default_width="60%")#json.dumps(fig,cls=plotly.utils.PlotlyJSONEncoder)
 		voltage_graphs.append(graph_json)
 		# plt.title("Period from "+chunks[i]["timestamp"][0].strftime("%d %b, %y %H:%M:%S") + ". Duration: " + str(chunks[i]["timestamp"][-1]-chunks[i]["timestamp"][0]))
 

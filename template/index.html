@@ -13,21 +13,6 @@
 	</style>
 </head>
 <body>
-	<form name="timestamp-select" method="POST" action="/adjust-cutoff/">
-		<label>
-			Current Range: {{earliest}} to {{latest}}
-			<input type="datetime-local" name="cutoff-time" 
-			{% if voltage_cutoff_time %}
-				value="{{voltage_cutoff_time}}"
-			{% endif %}
-			/>
-		</label>
-		<label>
-			Interval Gap To Split Charts (in seconds)
-			<input type="number" name="interval-limit" min="10" max="6000">
-		</label>
-		<input type="submit"/>
-	</form>
 	<div id="chart-container"></div>
 	{% for i in voltage_graphs %}
 	{{i|safe}}
