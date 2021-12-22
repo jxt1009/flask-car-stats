@@ -15,7 +15,9 @@ jobs:
     steps:
     - name: Python Dependency Installation
       uses: py-actions/py-dependency-install@v3.0.0
-
+      with:
+        update-setuptools: "false"
+        update-wheel: "false"
     - uses: actions/checkout@v2
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag python-webserver:$(date +%s)
