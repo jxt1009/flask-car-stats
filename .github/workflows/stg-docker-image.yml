@@ -1,4 +1,4 @@
-name: STG Docker Image CI
+name: STG Docker Image Build
 
 on:
   pull_request:
@@ -11,10 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
@@ -25,15 +21,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Pull latest Git image
-        uses: actions/checkout@v2
-        with:
-          ref: stg
-
-      - name: Build Docker STG img
-        run:  docker build . --file Dockerfile --tag stg-python-webserver:$(date +%s)
-
-      - name: Push image to Docker Hub
+      - name: Build and push STG image to Docker Hub
         uses: docker/build-push-action@v2
         with:
           tags: jtoper/stg-python-webserver:latest
