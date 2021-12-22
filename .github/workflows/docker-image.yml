@@ -1,4 +1,4 @@
-name: DEV Docker Image Build
+name: MAIN Docker Image Build
 
 on:
   pull_request:
