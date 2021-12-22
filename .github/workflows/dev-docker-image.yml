@@ -29,5 +29,5 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           tags: |
-            jtoper/dev-python-webserver:$(date +%s)
+            jtoper/dev-python-webserver:latest
           push: ${{ github.ref == 'refs/heads/dev' }}
