@@ -12,7 +12,8 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v2
+    steps:      
+    - uses: ryan-rozario/pipreqs-action-cpy@master
+    - uses: actions/checkout@dev
     - name: Build the Docker image
-      run: docker build . --tag dev-python-webserver:$(date +%s)
+      run: docker build . --file Dockerfile --tag python-webserver:$(date +%s)
