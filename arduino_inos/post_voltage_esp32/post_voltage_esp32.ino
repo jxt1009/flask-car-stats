@@ -89,7 +89,7 @@ void loop() {
     if(WiFi.status()== WL_CONNECTED){
       HTTPClient http;
 
-      String serverPath = serverName + String(getVoltage(),8);
+      String serverPath = serverName + String(getVoltage());
       
       // Your Domain name with URL path or IP address with path
       http.begin(serverPath.c_str());
