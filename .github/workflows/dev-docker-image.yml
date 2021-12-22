@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: DEV Docker Image CI
 
 on:
   push:
@@ -24,7 +24,9 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Pull latest Git image
-        uses: actions/checkout@main
+        uses: actions/checkout@v2
+        with:
+          ref: dev
 
       - name: Build Docker Dev img
         run:  docker build . --file Dockerfile --tag dev-python-webserver:$(date +%s)
