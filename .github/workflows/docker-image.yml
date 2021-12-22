@@ -1,4 +1,4 @@
-name: DEV Docker Image Build
+name: MAIN Docker Image Build
 
 on:
   pull_request:
@@ -25,4 +25,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           tags: jtoper/python-webserver:latest
+          file: Dockerfile
           push: true
+
