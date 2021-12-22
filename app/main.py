@@ -16,10 +16,9 @@ from flask import render_template, redirect, url_for, request, Response
 import pandas as pd
 
 mydb = mysql.connector.connect(
-	host="10.0.0.147",
-	user="jtoper",
-	database="car_stats",
-	password=""
+	host="172.21.0.2",
+	user="test",
+	database="car_stats"
 )
 
 app = flask.Flask(__name__, static_url_path='',
@@ -140,5 +139,5 @@ def schedule_function(function, delay_seconds):
 
 
 if __name__ == '__main__':
-	schedule_function(generate_voltage_chart, 5)
-	app.run(host='0.0.0.0', port=80)
+	schedule_function(generate_voltage_chart, 15)
+	app.run(host='0.0.0.0', port=5000)
