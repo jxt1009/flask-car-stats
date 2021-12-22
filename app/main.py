@@ -16,8 +16,9 @@ from flask import render_template, redirect, url_for, request, Response
 import pandas as pd
 
 mydb = mysql.connector.connect(
-	host="172.21.0.2",
+	host="10.0.0.147",
 	user="test",
+	port="3308",
 	database="car_stats"
 )
 
@@ -32,6 +33,7 @@ voltage_graph = 0
 voltage_graphs = []
 voltage_cutoff_time = ""
 voltage_interval_limit = 200
+voltage_scaling_factor = 15/2.951
 earliest = ""
 latest = ""
 
@@ -65,7 +67,7 @@ def get_voltage_chunks():
 	# Go through rows returned from db
 	for i in mycursor:
 		id.append(i[0])
-		voltage.append(i[1])
+		voltage.append(i[1] * voltage_scaling_factor)
 		car_id.append(i[2])
 		timestamp.append(i[3])
 
@@ -80,13 +82,13 @@ def get_voltage_chunks():
 	# Iterate through the entries and transfer them into the dataframe
 	# The voltage interval limit defines the maximum time between readings to separate
 	# the results into individual instances
-	for i in range(1, len(timestamp)):
-		if (timestamp[i] - timestamp[i - 1]).total_seconds() > voltage_interval_limit and i > 1:
-			cur_chunk['voltage_avg'] = cur_chunk['voltage'].rolling(30).mean()
+	for index in range(1, len(timestamp)):
+		i = len(timestamp) - index
+		if (timestamp[i] - timestamp[i - 1]).total_seconds() > voltage_interval_limit:
+			cur_chunk['voltage_avg'] = cur_chunk['voltage'].rolling(15).mean()
 			chunks.append(cur_chunk)
 			cur_chunk = cur_chunk[0:0]
-		if i == len(timestamp):
-			chunks.append(cur_chunk)
+			break
 
 		cur_chunk = cur_chunk.append({"timestamp": timestamp[i],
 									  "id": id[i],
@@ -103,17 +105,19 @@ def generate_voltage_chart():
 	chunks = get_voltage_chunks()
 	voltage_graphs.clear()
 	for i in range(0, len(chunks)):
+		voltage_avg = str(chunks[i]['voltage'].mean())[:6] +" volts avg"
 		fig = px.line(chunks[i],
 					  x='timestamp',
-					  y=['voltage', 'voltage_avg'])
+					  y=['voltage', 'voltage_avg'],
+					  title=voltage_avg)
 
 		graph_json = plotly.io.to_html(fig,
 									   include_plotlyjs=False,
 									   full_html=False,
-									   default_height=370,
-									   default_width="68%")  # json.dumps(fig,cls=plotly.utils.PlotlyJSONEncoder)
-
+									   default_height=450,
+									   default_width=1000)
 		voltage_graphs.append(graph_json)
+
 
 
 # Display the homepage
@@ -137,6 +141,10 @@ def schedule_function(function, delay_seconds):
 	# Shut down the scheduler when exiting the app
 	atexit.register(lambda: scheduler.shutdown())
 
+
+@app.route("/voltage-chart")
+def get_voltage_chart():
+	return Response(voltage_graphs[0])
 
 if __name__ == '__main__':
 	schedule_function(generate_voltage_chart, 15)
