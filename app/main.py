@@ -18,7 +18,6 @@ import pandas as pd
 mydb = mysql.connector.connect(
 	host="172.21.0.2",
 	user="test",
-	#password="password",
 	database="car_stats"
 )
 
