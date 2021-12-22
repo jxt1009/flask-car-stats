@@ -22,7 +22,9 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Pull latest Git image
-        uses: actions/checkout@main
+        uses: actions/checkout@v2
+        with:
+          ref: main
 
       - name: Build the Docker image
         run:  docker build . --file Dockerfile --tag python-webserver:$(date +%s)

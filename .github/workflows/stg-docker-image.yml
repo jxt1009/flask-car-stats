@@ -22,14 +22,16 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Pull latest Git image
-        uses: actions/checkout@main
+        uses: actions/checkout@v2
+        with:
+          ref: stg
 
-      - name: Build Docker Dev img
+      - name: Build Docker Stg img
         run:  docker build . --file Dockerfile --tag stg-python-webserver:$(date +%s)
 
       - name: Push image to Docker Hub
         uses: docker/build-push-action@v2
         with:
           tags: |
-            jtoper/stg-python-webserver:latest
+            jtoper/dev-python-webserver:latest
           push: ${{ github.ref == 'refs/heads/stg' }}
