@@ -27,4 +27,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           tags: jtoper/dev-python-webserver:latest
+          context: .
+          file: Dockerfile
           push: true
