@@ -1,8 +1,8 @@
-name: MAIN Docker Image Build
+name: STG Docker Image Build
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ stg ]
 
 jobs:
 
@@ -21,10 +21,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push MAIN image to Docker Hub
+      - name: Build and push STG image to Docker Hub
         uses: docker/build-push-action@v2
         with:
-          tags: jtoper/python-webserver:latest
+          tags: jtoper/stg-python-webserver:latest
           file: Dockerfile
           push: true
 
