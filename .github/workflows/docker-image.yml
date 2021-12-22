@@ -15,8 +15,6 @@ jobs:
     steps:
     - name: Python Dependency Installation
       uses: py-actions/py-dependency-install@v3.0.0
-      with:
-          path: "requirements.txt"
 
     - uses: actions/checkout@v2
     - name: Build the Docker image
