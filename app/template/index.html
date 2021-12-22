@@ -1,12 +1,21 @@
 <html>
 <h1>
-	Test
+Voltage Graph Test
 </h1>
 <head>
 	<title>{{ title }}</title>
 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script>
+		$( document ).ready(function() {
+			$( "#chart-container" ).load("/voltage-chart");
+			setInterval(function () {	$( "#chart-container" ).load("/voltage-chart") }, 10000);
+		});
+	</script>
 	<style>
+		.modebar{
+			display: none !important;
+		}
 		input, label {
 			display:block;
 		}
@@ -14,9 +23,5 @@
 </head>
 <body>
 	<div id="chart-container"></div>
-	{% for i in voltage_graphs %}
-		{{i|safe}}
-	{% endfor %}
-</ul>
 </body>
 </html>
