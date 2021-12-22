@@ -1,0 +1,31 @@
+name: Docker Image CI
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull latest Git image
+        uses: actions/checkout@main
+
+      - name: Build Docker Dev img
+        run:  docker build . --file Dockerfile --tag python-webserver:$(date +%s)
+
+      - name: Push image to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          tags: |
+            jtoper/python-webserver:latest
+          push: ${{ github.ref == 'refs/heads/main' }}
