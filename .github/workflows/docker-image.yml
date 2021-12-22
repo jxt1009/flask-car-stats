@@ -1,4 +1,4 @@
-name: MAIN Docker Image CI
+name: DEV Docker Image Build
 
 on:
   pull_request:
@@ -21,15 +21,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Pull latest Git image
-        uses: actions/checkout@v2
-        with:
-          ref: main
-
-      - name: Build the Docker image
-        run:  docker build . --file Dockerfile --tag python-webserver:$(date +%s)
-
-      - name: Push image to Docker Hub
+      - name: Build and push MAIN image to Docker Hub
         uses: docker/build-push-action@v2
         with:
           tags: jtoper/python-webserver:latest
