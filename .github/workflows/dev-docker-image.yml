@@ -28,7 +28,7 @@ jobs:
         with:
           ref: dev
 
-      - name: Build Docker Dev img
+      - name: Build Docker DEV img
         run:  docker build . --file Dockerfile --tag dev-python-webserver:$(date +%s)
 
       - name: Push image to Docker Hub
