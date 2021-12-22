@@ -26,12 +26,12 @@ jobs:
         with:
           ref: stg
 
-      - name: Build Docker Stg img
+      - name: Build Docker STG img
         run:  docker build . --file Dockerfile --tag stg-python-webserver:$(date +%s)
 
       - name: Push image to Docker Hub
         uses: docker/build-push-action@v2
         with:
           tags: |
-            jtoper/dev-python-webserver:latest
+            jtoper/stg-python-webserver:latest
           push: ${{ github.ref == 'refs/heads/stg' }}
