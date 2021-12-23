@@ -3,7 +3,7 @@ name: STG Docker Image Build
 on:
   pull_request:
     branches: [ stg ]
-    types: [ opened ]
+    types: [ opened, edited ]
 
 jobs:
   build:
