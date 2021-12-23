@@ -6,7 +6,6 @@ on:
     types: [ opened ]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
 
@@ -23,6 +22,7 @@ jobs:
 
       - name: Build and push STG image to Docker Hub
         uses: docker/build-push-action@v2
+        if: ${{ github.base_ref  == 'stg' }}
         with:
           tags: jtoper/stg-python-webserver:latest
           file: Dockerfile
