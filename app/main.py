@@ -1,18 +1,12 @@
 import atexit
-import base64
-import io
-import random
-import time
-from datetime import datetime
-from io import BytesIO
+from datetime import datetime, timedelta
 
 import plotly
 import plotly.express as px
 import flask
-import json
 import mysql.connector
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask import render_template, redirect, url_for, request, Response
+from flask import render_template, Response
 import pandas as pd
 
 mydb = mysql.connector.connect(
@@ -26,7 +20,7 @@ app = flask.Flask(__name__, static_url_path='',
 				  static_folder='static',
 				  template_folder='template')
 app.config["DEBUG"] = True
-mycursor = mydb.cursor()
+mycursor = mydb.cursor(buffered=True)
 
 # Global mapping variables
 voltage_graph = 0
@@ -34,68 +28,39 @@ voltage_graphs = []
 voltage_cutoff_time = ""
 voltage_interval_limit = 200
 voltage_scaling_factor = 15/2.951
-earliest = ""
-latest = ""
 
 
 # Post route to submit voltage to SQL db
 @app.route('/voltage/<voltage>', methods=['GET', 'POST'])
 def post_voltage(voltage):
 	sql = "INSERT INTO voltage (voltage, car_id) VALUES (%s, %s)"
-	if voltage.isnumeric():
-		val = (voltage, "01")
-		print(mycursor.execute(sql, val))
-		return "Success"
-	return "Invalid request"
+	val = (voltage, "01")
+	mycursor.execute(sql, val)
+	return "Success"
 
 
 # Get the chunks of time series data from the SQL db
 def get_voltage_chunks():
-	global earliest
-	global latest
-	id = []
-	voltage = []
-	car_id = []
-	timestamp = []
-	sql = "SELECT id,voltage,car_id,timestamp FROM voltage"
-	if voltage_cutoff_time != "":
-		sql += " WHERE timestamp >= %s;"
-		mycursor.execute(sql, (datetime.strptime(voltage_cutoff_time, '%Y-%m-%dT%H:%M'),))
-	else:
-		mycursor.execute(sql + ";")
+	minutes_offset = 30
+	row_count = 0
+	while row_count < 100:
+		sql = "SELECT id,voltage,car_id,timestamp FROM voltage"
+		sql += " WHERE timestamp BETWEEN %s AND %s;"
+		mycursor.execute(sql, ((datetime.now()-timedelta(minutes=minutes_offset)).strftime('%Y-%m-%dT%H:%M'),datetime.now().strftime('%Y-%m-%dT%H:%M'),))
+		minutes_offset += 30
+		row_count = mycursor.rowcount
 
 	# Go through rows returned from db
+	db_results = pd.DataFrame(columns=["timestamp", "id", "car_id", "voltage", 'voltage_avg'])
 	for i in mycursor:
-		id.append(i[0])
-		voltage.append(i[1] * voltage_scaling_factor)
-		car_id.append(i[2])
-		timestamp.append(i[3])
-
-	chunks = []
-	cur_chunk = pd.DataFrame(columns=["timestamp", "id", "car_id", "voltage", 'voltage_avg'])
-	cur_chunk.voltage_avg = 0
-
-	# Save params for web display
-	earliest = timestamp[0]
-	latest = timestamp[-1]
-
-	# Iterate through the entries and transfer them into the dataframe
-	# The voltage interval limit defines the maximum time between readings to separate
-	# the results into individual instances
-	for index in range(1, len(timestamp)):
-		i = len(timestamp) - index
-		if (timestamp[i] - timestamp[i - 1]).total_seconds() > voltage_interval_limit:
-			cur_chunk['voltage_avg'] = cur_chunk['voltage'].rolling(15).mean()
-			chunks.append(cur_chunk)
-			cur_chunk = cur_chunk[0:0]
-			break
-
-		cur_chunk = cur_chunk.append({"timestamp": timestamp[i],
-									  "id": id[i],
-									  "car_id": car_id[i],
-									  "voltage": voltage[i]},
+		db_results = db_results.append({"timestamp": i[3],
+									  "id":i[0],
+									  "car_id": i[2],
+									  "voltage": i[1] * voltage_scaling_factor},
 									 ignore_index=True)
-	return chunks
+	db_results = db_results.sort_values(by="timestamp")
+	db_results['voltage_avg'] = db_results['voltage'].expanding().mean()
+	return [db_results]
 
 
 # Generate HTML graphs with plotly
@@ -105,7 +70,7 @@ def generate_voltage_chart():
 	chunks = get_voltage_chunks()
 	voltage_graphs.clear()
 	for i in range(0, len(chunks)):
-		voltage_avg = str(chunks[i]['voltage'].mean())[:6] +" volts avg"
+		voltage_avg = str(chunks[i]['voltage'].mean())[:4] +" volts avg"
 		fig = px.line(chunks[i],
 					  x='timestamp',
 					  y=['voltage', 'voltage_avg'],
@@ -119,22 +84,19 @@ def generate_voltage_chart():
 		voltage_graphs.append(graph_json)
 
 
-
 # Display the homepage
 @app.route("/")
 def homepage():
 	return render_template("index.html",
 						   title="Voltage Chart Test",
 						   voltage_graphs=voltage_graphs,
-						   latest=latest,
-						   earliest=earliest,
 						   voltage_cutoff_time=voltage_cutoff_time)
 
 
 # Basically a cron job, also runs the job once before adding it
 def schedule_function(function, delay_seconds):
 	function()
-	scheduler = BackgroundScheduler({'apscheduler.job_defaults.max_instances': 2}, timezone='UTC')
+	scheduler = BackgroundScheduler({'apscheduler.job_defaults.max_instances': 1}, timezone='UTC')
 	scheduler.add_job(func=function, trigger="interval", seconds=delay_seconds)
 	scheduler.start()
 
@@ -144,7 +106,11 @@ def schedule_function(function, delay_seconds):
 
 @app.route("/voltage-chart")
 def get_voltage_chart():
-	return Response(voltage_graphs[0])
+	html = ""
+	for graph in voltage_graphs:
+		html+=graph
+	return Response(html)
+
 
 if __name__ == '__main__':
 	schedule_function(generate_voltage_chart, 15)
