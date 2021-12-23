@@ -9,6 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    if: github.ref == 'refs/heads/stg'
     steps:
       - name: Set up Docker Buildx
         id: buildx
@@ -22,7 +23,6 @@ jobs:
 
       - name: Build and push STG image to Docker Hub
         uses: docker/build-push-action@v2
-        if: ${{ GITHUB_REF_NAME  == 'stg' }}
         with:
           tags: jtoper/stg-python-webserver:latest
           file: Dockerfile
