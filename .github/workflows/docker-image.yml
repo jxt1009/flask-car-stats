@@ -3,7 +3,7 @@ name: MAIN Docker Image Build
 on:
   pull_request:
     branches: [ main ]
-    types: [ closed ]
+    types: [ opened, closed ]
 
 jobs:
 
@@ -24,7 +24,6 @@ jobs:
 
       - name: Build and push MAIN image to Docker Hub
         uses: docker/build-push-action@v2
-        if: ${{ github.base_ref  == 'main' }}
         with:
           tags: jtoper/python-webserver:latest
           file: Dockerfile

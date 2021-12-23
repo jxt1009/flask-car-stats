@@ -3,13 +3,10 @@ name: STG Docker Image Build
 on:
   pull_request:
     branches: [ stg ]
-    types: [ opened, edited ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    if: ${{GITHUB_REF_NAME}} == 'refs/heads/stg'
     steps:
       - name: Set up Docker Buildx
         id: buildx
