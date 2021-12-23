@@ -3,6 +3,7 @@ name: MAIN Docker Image Build
 on:
   pull_request:
     branches: [ main ]
+    types: [ opened ]
 
 jobs:
 
