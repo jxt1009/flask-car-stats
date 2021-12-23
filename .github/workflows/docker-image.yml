@@ -10,7 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    if: ${{GITHUB_REF_NAME}} == 'refs/heads/main'
     steps:
       - name: Set up Docker Buildx
         id: buildx
@@ -28,4 +27,3 @@ jobs:
           tags: jtoper/python-webserver:latest
           file: Dockerfile
           push: true
-

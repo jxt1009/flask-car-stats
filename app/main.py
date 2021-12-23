@@ -5,7 +5,6 @@ import plotly
 import plotly.express as px
 import flask
 import mysql.connector
-import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import render_template, Response
 import pandas as pd
