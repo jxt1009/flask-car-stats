@@ -1,10 +1,11 @@
 import atexit
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import plotly
 import plotly.express as px
 import flask
 import mysql.connector
+import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import render_template, Response
 import pandas as pd
@@ -41,19 +42,20 @@ def post_voltage(voltage):
 
 # Get the chunks of time series data from the SQL db
 def get_voltage_chunks():
+
 	minutes_offset = 30
 	row_count = 0
 	while row_count < 100:
 		sql = "SELECT id,voltage,car_id,timestamp FROM voltage"
 		sql += " WHERE timestamp BETWEEN %s AND %s;"
-		mycursor.execute(sql, ((datetime.now()-timedelta(minutes=minutes_offset)).strftime('%Y-%m-%dT%H:%M'),datetime.now().strftime('%Y-%m-%dT%H:%M'),))
+		mycursor.execute(sql, ((datetime.utcnow()-timedelta(minutes=minutes_offset)).strftime('%Y-%m-%dT%H:%M'),datetime.utcnow().strftime('%Y-%m-%dT%H:%M'),))
 		minutes_offset += 30
 		row_count = mycursor.rowcount
 
 	# Go through rows returned from db
 	db_results = pd.DataFrame(columns=["timestamp", "id", "car_id", "voltage", 'voltage_avg'])
 	for i in mycursor:
-		db_results = db_results.append({"timestamp": i[3],
+		db_results = db_results.append({"timestamp": utc_to_local(i[3]),
 									  "id":i[0],
 									  "car_id": i[2],
 									  "voltage": i[1] * voltage_scaling_factor},
@@ -111,6 +113,9 @@ def get_voltage_chart():
 		html+=graph
 	return Response(html)
 
+
+def utc_to_local(utc_dt):
+	return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
 
 if __name__ == '__main__':
 	schedule_function(generate_voltage_chart, 15)
