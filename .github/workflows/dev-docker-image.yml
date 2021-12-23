@@ -1,0 +1,19 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:      
+    - uses: ryan-rozario/pipreqs-action-cpy@master
+    - uses: actions/checkout@dev
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag python-webserver:$(date +%s)
