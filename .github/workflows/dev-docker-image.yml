@@ -23,7 +23,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - uses: actions/checkout@dev
+      - uses: actions/checkout@main
       - name: Build the Docker image
         run:  docker build . --file Dockerfile --tag dev-python-webserver:$(date +%s)
       - name: Build image and push to Docker Hub and GitHub Container Registry
