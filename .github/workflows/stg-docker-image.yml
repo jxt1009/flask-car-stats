@@ -3,12 +3,11 @@ name: STG Docker Image Build
 on:
   pull_request:
     branches: [ stg ]
-    types: [ closed ]
+    types: [ opened ]
 
 jobs:
 
   build:
-
     runs-on: ubuntu-latest
 
     steps:
