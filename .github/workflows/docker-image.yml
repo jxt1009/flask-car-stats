@@ -3,14 +3,14 @@ name: MAIN Docker Image Build
 on:
   pull_request:
     branches: [ main ]
-    types: [ opened ]
+    types: [ opened, closed ]
 
 jobs:
 
   build:
-
     runs-on: ubuntu-latest
 
+    if: ${{GITHUB_REF_NAME}} == 'refs/heads/main'
     steps:
       - name: Set up Docker Buildx
         id: buildx
