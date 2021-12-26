@@ -27,4 +27,3 @@ jobs:
           tags: jtoper/python-webserver:latest
           file: Dockerfile
           push: true
-

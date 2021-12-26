@@ -7,6 +7,7 @@ Voltage Graph Test
 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script>
+		$( document ).load("/get_time/"+Intl.DateTimeFormat().resolvedOptions().timeZone);
 		$( document ).ready(function() {
 			$( "#chart-container" ).load("/voltage-chart");
 			setInterval(function () {	$( "#chart-container" ).load("/voltage-chart") }, 10000);

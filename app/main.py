@@ -1,12 +1,13 @@
 import atexit
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 import plotly
 import plotly.express as px
 import flask
 import mysql.connector
+import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask import render_template, Response
+from flask import render_template, Response, request
 import pandas as pd
 
 mydb = mysql.connector.connect(
@@ -26,9 +27,15 @@ mycursor = mydb.cursor(buffered=True)
 voltage_graph = 0
 voltage_graphs = []
 voltage_cutoff_time = ""
-voltage_interval_limit = 200
-voltage_scaling_factor = 15/2.951
+voltage_interval_limit = 400
+voltage_scaling_factor = 13/2.955
+timezone = pytz.timezone("America/New_York")
 
+@app.route("/get_time/<country>/<region>", methods=['GET'])
+def getTime(country,region):
+	global timezone
+	timezone = pytz.timezone(country+"/"+region)
+	return Response("ok")
 
 # Post route to submit voltage to SQL db
 @app.route('/voltage/<voltage>', methods=['GET', 'POST'])
@@ -41,23 +48,26 @@ def post_voltage(voltage):
 
 # Get the chunks of time series data from the SQL db
 def get_voltage_chunks():
-	minutes_offset = 30
-	row_count = 0
-	while row_count < 100:
-		sql = "SELECT id,voltage,car_id,timestamp FROM voltage"
-		sql += " WHERE timestamp BETWEEN %s AND %s;"
-		mycursor.execute(sql, ((datetime.now()-timedelta(minutes=minutes_offset)).strftime('%Y-%m-%dT%H:%M'),datetime.now().strftime('%Y-%m-%dT%H:%M'),))
-		minutes_offset += 30
-		row_count = mycursor.rowcount
+	global timezone
+
+	sql = "SELECT id,voltage,car_id,timestamp FROM voltage"
+	sql += " WHERE timestamp BETWEEN %s AND %s;"
+	mycursor.execute(sql, ((datetime.utcnow()-timedelta(minutes=voltage_interval_limit)).strftime('%Y-%m-%dT%H:%M'),datetime.utcnow().strftime('%Y-%m-%dT%H:%M'),))
+	row_count = mycursor.rowcount
 
 	# Go through rows returned from db
 	db_results = pd.DataFrame(columns=["timestamp", "id", "car_id", "voltage", 'voltage_avg'])
 	for i in mycursor:
-		db_results = db_results.append({"timestamp": i[3],
+		db_results = db_results.append({"timestamp": timezone.fromutc(i[3]),
 									  "id":i[0],
 									  "car_id": i[2],
 									  "voltage": i[1] * voltage_scaling_factor},
 									 ignore_index=True)
+	db_results = db_results.append({"timestamp": timezone.fromutc(datetime.utcnow()),
+									"id":db_results['id'].iloc[-1],
+									"car_id": db_results['car_id'].iloc[-1],
+									"voltage": db_results['voltage'].iloc[-1]},
+								   ignore_index=True)
 	db_results = db_results.sort_values(by="timestamp")
 	db_results['voltage_avg'] = db_results['voltage'].expanding().mean()
 	return [db_results]
@@ -70,7 +80,7 @@ def generate_voltage_chart():
 	chunks = get_voltage_chunks()
 	voltage_graphs.clear()
 	for i in range(0, len(chunks)):
-		voltage_avg = str(chunks[i]['voltage'].mean())[:4] +" volts avg"
+		voltage_avg = str(chunks[i]['voltage'].mean())[:5] +" volts avg"
 		fig = px.line(chunks[i],
 					  x='timestamp',
 					  y=['voltage', 'voltage_avg'],
@@ -107,11 +117,14 @@ def schedule_function(function, delay_seconds):
 @app.route("/voltage-chart")
 def get_voltage_chart():
 	html = ""
+	while len(voltage_graphs) == 0:
+		pass
 	for graph in voltage_graphs:
 		html+=graph
 	return Response(html)
 
 
+
 if __name__ == '__main__':
-	schedule_function(generate_voltage_chart, 15)
+	schedule_function(generate_voltage_chart, 60)
 	app.run(host='0.0.0.0', port=5000)
