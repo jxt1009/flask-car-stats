@@ -2,7 +2,6 @@ version: "3.8"
 services:
   prod:
     image: "jtoper/python-webserver:latest"
-    container_name: "prod"
     ports:
       - "80:80"
     networks:
@@ -10,7 +9,6 @@ services:
 
   stg:
     image: "jtoper/stg-python-webserver:latest"
-    container_name: "stg"
     ports:
       - "81:80"
     networks:
@@ -18,7 +16,6 @@ services:
 
   dev:
     image: "jtoper/dev-python-webserver:latest"
-    container_name: "dev"
     ports:
       - "82:80"
     networks:
@@ -26,7 +23,6 @@ services:
 
   phpmyadmin:
     image: "jtoper/phpmyadmin:latest"
-    container_name: "phpmyadmin"
     ports:
       - "8081:80"
     networks:
@@ -34,7 +30,6 @@ services:
 
   db:
     image: "jtoper/webserver-db:latest"
-    container_name: "db"
     ports:
       - "3308:3306"
     networks:
@@ -46,5 +41,5 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 172.21.1.0/16
+        - subnet: 172.22.0.0/16
     attachable: true
