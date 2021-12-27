@@ -5,23 +5,17 @@ services:
     container_name: "prod"
     ports:
       - "80:80"
-    volumes:
-      - .:/app
 
   stg:
     image: "jtoper/stg-python-webserver:latest"
     container_name: "stg"
     ports:
       - "81:80"
-    volumes:
-      - .:/app
   dev:
     image: "jtoper/dev-python-webserver:latest"
     container_name: "dev"
     ports:
       - "82:80"
-    volumes:
-      - .:/app
 
 networks:
   default:
