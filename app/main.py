@@ -8,8 +8,7 @@ import pandas as pd
 conn = pymysql.connect(host="0.0.0.0",
 					   port=3306,
 					   user="test",
-					   database="car_stats",
-					   port=3308)
+					   database="car_stats")
 
 
 app = flask.Flask(__name__, static_url_path='',
