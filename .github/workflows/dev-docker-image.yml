@@ -26,6 +26,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           tags: jtoper/dev-python-webserver:latest
-          build-args: ['--port 83:80','--network phpmyadmin_default']
+          build-args: '--port 83:80','--network phpmyadmin_default'
           file: Dockerfile
           push: true
