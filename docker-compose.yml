@@ -1,13 +1,24 @@
 version: "3.8"
 services:
-  app:
-    build: .
+  dev:
+    image: "jtoper/dev-python-webserver:latest"
     ports:
-      - "80:5000"
-    volumes:
-      - .:/app
-    
-networks:
-  default:
-    external: true
-    name: phpmyadmin_default
+      - "82:80"
+    depends_on:
+      - db
+    links:
+      - db
+
+  phpmyadmin:
+    image: "jtoper/phpmyadmin:latest"
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    links:
+      - db
+
+  db:
+    image: "jtoper/webserver-db:latest"
+    ports:
+      - "3308:3306"
