@@ -5,7 +5,7 @@ LABEL maintainer="jamesontoper@gmail.com"
 #By default, the application runs on port 80, you can choose a different port by uncommenting the LISTEN PORT and EXPOSE
 #ENV LISTEN_PORT 8080
 
-#EXPOSE 8080
+EXPOSE 8080:80
 RUN pip install flask
 # URL under which static (not modified by Python) files will be requested
 # They will be served by Nginx directly, without being handled by uWSGI
