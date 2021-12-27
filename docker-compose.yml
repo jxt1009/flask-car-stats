@@ -26,4 +26,4 @@ services:
       - app
 networks:
   app:
-    driver: overlay
+    driver: bridge
