@@ -1,23 +1,5 @@
 version: "3.8"
 services:
-  prod:
-    image: "jtoper/python-webserver:latest"
-    ports:
-      - "80:80"
-    depends_on:
-      - "db"
-    networks:
-      - app
-
-  stg:
-    image: "jtoper/stg-python-webserver:latest"
-    ports:
-      - "81:80"
-    depends_on:
-      - "db"
-    networks:
-      - app
-
   dev:
     image: "jtoper/dev-python-webserver:latest"
     ports:
