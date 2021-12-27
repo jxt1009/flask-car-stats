@@ -5,7 +5,7 @@ import pymysql
 from flask import render_template
 import pandas as pd
 
-conn = pymysql.connect(host="0.0.0.0",
+conn = pymysql.connect(host="10.0.3.6",
 					   port=3306,
 					   user="test",
 					   database="car_stats")
