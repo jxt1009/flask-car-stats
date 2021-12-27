@@ -7,7 +7,7 @@ Voltage Graph Test
 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
-	<style src="/style.css"></style>
+	<link rel="stylesheet" href="/style.css">
 	<script>
 		window.onload = function() {
 
@@ -28,7 +28,7 @@ Voltage Graph Test
 					verticalAlign: "top",
 					horizontalAlign: "center",
 					dockInsidePlotArea: true,
-					itemclick: toogleDataSeries
+					itemclick: toggleDataSeries
 				},
 				axisY: [
 					{
@@ -57,7 +57,6 @@ Voltage Graph Test
 			});
 
 			function addData(data) {
-				console.log(data);
 				for (var i = 0; i < data.length; i++) {
 					volts.push({
 						x: new Date(data[i].timestamp),
@@ -73,7 +72,7 @@ Voltage Graph Test
 			}
 
 			$.getJSON("/voltage-chart", addData);
-			function toogleDataSeries(e){
+			function toggleDataSeries(e){
 				if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
 					e.dataSeries.visible = false;
 				} else{
