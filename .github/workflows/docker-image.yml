@@ -26,5 +26,4 @@ jobs:
         with:
           tags: jtoper/python-webserver:latest
           file: Dockerfile
-          network: phpmyadmin_default
           push: true

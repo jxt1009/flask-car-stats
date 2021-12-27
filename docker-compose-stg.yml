@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  app:
+    image: "jtoper/stg-python-webserver:latest"
+    ports:
+      - "81:80"
+    volumes:
+      - .:/app
+
+networks:
+  default:
+    external: true
+    name: phpmyadmin_default
