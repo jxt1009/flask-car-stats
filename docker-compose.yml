@@ -4,21 +4,29 @@ services:
     image: "jtoper/python-webserver:latest"
     ports:
       - "80:80"
+    depends_on:
+      - "db"
 
   stg:
     image: "jtoper/stg-python-webserver:latest"
     ports:
       - "81:80"
+    depends_on:
+      - "db"
 
   dev:
     image: "jtoper/dev-python-webserver:latest"
     ports:
       - "82:80"
+    depends_on:
+      - "db"
 
   phpmyadmin:
     image: "jtoper/phpmyadmin:latest"
     ports:
       - "8081:80"
+    depends_on:
+      - "db"
 
   db:
     image: "jtoper/webserver-db:latest"
