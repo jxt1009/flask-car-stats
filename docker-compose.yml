@@ -16,6 +16,16 @@ services:
     container_name: "dev"
     ports:
       - "82:80"
+  phpmyadmin:
+    image: "jtoper/phpmyadmin:latest"
+    container_name: "phpmyadmin"
+    ports:
+      - "8081:80"
+  db:
+    image: "jtoper/webserver-db:latest"
+    container_name: "db"
+    ports:
+      - "3308:3306"
 
 networks:
   default:
