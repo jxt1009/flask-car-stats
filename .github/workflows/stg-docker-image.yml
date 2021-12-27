@@ -22,6 +22,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           tags: jtoper/stg-python-webserver:latest
-          file: Dockerfile
+          file: Dockerfile-stg
           push: true
 
