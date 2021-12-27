@@ -4,6 +4,8 @@ services:
     image: "jtoper/dev-python-webserver:latest"
     ports:
       - "0.0.0.0:82:80"
+    expose:
+      - 82
     depends_on:
       - "db"
     network_mode: "host"
@@ -12,6 +14,8 @@ services:
     image: "jtoper/phpmyadmin:latest"
     ports:
       - "0.0.0.0:8081:80"
+    expose:
+      - 8081
     depends_on:
       - "db"
     network_mode: "host"
@@ -20,4 +24,6 @@ services:
     image: "jtoper/webserver-db:latest"
     ports:
       - "0.0.0.0:3308:3306"
+    expose:
+      - 3306
     network_mode: "host"
