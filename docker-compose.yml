@@ -37,7 +37,7 @@ services:
 
 networks:
   frontend:
-    driver: bridge
+    driver: overlay
     ipam:
       driver: default
       config:
