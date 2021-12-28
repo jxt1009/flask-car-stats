@@ -8,6 +8,7 @@ import pandas as pd
 conn = pymysql.connect(host="10.0.0.147",
 					   port=3308,
 					   user="test",
+					   password="root",
 					   database="car_stats")
 
 
