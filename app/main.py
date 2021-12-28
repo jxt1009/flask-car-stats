@@ -44,7 +44,8 @@ def get_voltage_chunks():
 
 	db_results = pd.read_sql(sql=sql,con=conn,params=params)
 	db_results.voltage = db_results.voltage.apply(lambda x: x * ((R2+R1)/R2))
-	db_results.voltage_avg = db_results.voltage.expanding().mean()
+	db_results['voltage_avg'] = db_results.voltage.expanding().mean()
+	db_results = db_results.sort_values(by="timestamp")
 	return db_results
 
 # Display the homepage
@@ -58,6 +59,8 @@ def get_voltage_chart():
 	chunks = get_voltage_chunks()
 	if len(chunks) > 0:
 		return chunks.to_json(orient="records")
+	else:
+		return None
 
 
 if __name__ == '__main__':
