@@ -44,7 +44,7 @@ def get_voltage_chunks():
 
 	db_results = pd.read_sql(sql=sql,con=conn,params=params)
 	db_results.voltage = db_results.voltage.apply(lambda x: x * ((R2+R1)/R2))
-	db_results.voltage_avg = db_results.voltage.expanding.mean()
+	db_results.voltage_avg = db_results.voltage.expanding().mean()
 	return db_results
 
 # Display the homepage
