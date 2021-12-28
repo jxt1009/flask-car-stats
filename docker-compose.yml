@@ -2,8 +2,8 @@ version: "3.8"
 services:
   dev:
     image: "jtoper/dev-python-webserver:latest"
-    expose:
-      - 82
+    ports:
+      - "82:80"
     depends_on:
       - "db"
     networks:
@@ -13,8 +13,8 @@ services:
 
   phpmyadmin:
     image: "jtoper/phpmyadmin:latest"
-    expose:
-      - 8081
+    ports:
+      - "8081:80"
     depends_on:
       - "db"
     networks:
@@ -24,8 +24,8 @@ services:
 
   db:
     image: "jtoper/webserver-db:latest"
-    expose:
-      - 3308
+    ports:
+      - "3308:3306"
     networks:
       - app
 
