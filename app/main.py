@@ -43,13 +43,7 @@ def get_voltage_chunks():
 	params = ((datetime.utcnow()-timedelta(minutes=200)).strftime('%Y-%m-%dT%H:%M'),datetime.utcnow().strftime('%Y-%m-%dT%H:%M'),)
 
 	db_results = pd.read_sql(sql=sql,con=conn,params=params)
-	db_results = db_results.sort_values(by="timestamp")
-	db_results['voltage'] = db_results['voltage'].apply(lambda x: x * ((R1+R2)/R2))
-	db_results['timestamp'] = db_results['timestamp']
-	db_results['voltage_avg'] = db_results['voltage'].expanding().mean()
-	db_results.append(db_results.iloc[-1],ignore_index=True)
 	return db_results
-
 
 # Display the homepage
 @app.route("/")
