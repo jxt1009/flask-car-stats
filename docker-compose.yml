@@ -9,6 +9,24 @@ services:
     links:
       - db
 
+  stg:
+    image: "jtoper/stg-python-webserver:latest"
+    ports:
+      - "81:80"
+    depends_on:
+      - db
+    links:
+      - db
+
+  prod:
+    image: "jtoper/python-webserver:latest"
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+    links:
+      - db
+
   phpmyadmin:
     image: "jtoper/phpmyadmin:latest"
     ports:
