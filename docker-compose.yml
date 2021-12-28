@@ -5,9 +5,7 @@ services:
     ports:
       - "82:80"
     depends_on:
-      - "db"
-    networks:
-      - web_network
+      - db
     links:
       - db
 
@@ -16,9 +14,7 @@ services:
     ports:
       - "8081:80"
     depends_on:
-      - "db"
-    networks:
-      - web_network
+      - db
     links:
       - db
 
@@ -26,5 +22,3 @@ services:
     image: "jtoper/webserver-db:latest"
     ports:
       - "3308:3306"
-    networks:
-      - web_network
