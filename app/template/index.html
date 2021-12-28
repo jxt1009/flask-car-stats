@@ -58,6 +58,12 @@ Voltage Graph Test
 			});
 
 			function addData(data) {
+				while(avg_volts.length > 0) {
+					avg_volts.pop();
+				}
+				while(volts.length > 0) {
+					volts.pop();
+				}
 				for (var i = 0; i < data.length; i++) {
 					volts.push({
 						x: new Date(data[i].timestamp),
