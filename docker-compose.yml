@@ -8,6 +8,8 @@ services:
       - "db"
     networks:
       - app
+    links:
+      - db
 
   phpmyadmin:
     image: "jtoper/phpmyadmin:latest"
@@ -17,6 +19,8 @@ services:
       - "db"
     networks:
       - app
+    links:
+      - db
 
   db:
     image: "jtoper/webserver-db:latest"
