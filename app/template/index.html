@@ -6,23 +6,90 @@ Voltage Graph Test
 	<title>{{ title }}</title>
 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+	<link rel="stylesheet" href="/style.css">
 	<script>
-		$( document ).load("/get_time/"+Intl.DateTimeFormat().resolvedOptions().timeZone);
-		$( document ).ready(function() {
-			$( "#chart-container" ).load("/voltage-chart");
-			setInterval(function () {	$( "#chart-container" ).load("/voltage-chart") }, 10000);
-		});
+		window.onload = function() {
+
+			var volts = [];
+			var avg_volts = [];
+
+			var chart = new CanvasJS.Chart("chartContainer", {
+				animationEnabled: true,
+				theme: "light2",
+				title: {
+					text: "Battery Charge Status"
+				},
+				toolTip: {
+					shared: true
+				},
+				legend: {
+					cursor: "pointer",
+					verticalAlign: "top",
+					horizontalAlign: "center",
+					dockInsidePlotArea: true,
+					itemclick: toggleDataSeries
+				},
+				axisY: [
+					{
+						title: "Volts",
+						titleFontSize: 24
+					}
+				],
+				data: [
+					{
+						axisYType: "secondary",
+						type: "line",
+						showInLegend: true,
+						name: "Raw Voltage",
+						yValueFormatString: "##.### Volts",
+						dataPoints: volts
+					},
+					{
+						axisYType: "secondary",
+						type: "line",
+						showInLegend: true,
+						name: "Average Voltage",
+						yValueFormatString: "##.### Volts",
+						dataPoints: avg_volts
+					}
+				]
+			});
+
+			function addData(data) {
+				for (var i = 0; i < data.length; i++) {
+					volts.push({
+						x: new Date(data[i].timestamp),
+						y: data[i].voltage
+					});
+					avg_volts.push({
+						x: new Date(data[i].timestamp),
+						y: data[i].voltage_avg
+					});
+				}
+				chart.render();
+
+			}
+
+			$.getJSON("/voltage-chart", addData);
+			function toggleDataSeries(e){
+				if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+					e.dataSeries.visible = false;
+				} else{
+					e.dataSeries.visible = true;
+				}
+				chart.render();
+			}
+
+		}
 	</script>
 	<style>
-		.modebar{
-			display: none !important;
-		}
-		input, label {
-			display:block;
-		}
+
 	</style>
 </head>
 <body>
-	<div id="chart-container"></div>
+	<div id="body-content">
+		<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+	</div>
 </body>
 </html>
