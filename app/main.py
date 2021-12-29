@@ -41,7 +41,7 @@ def post_voltage(voltage):
 def get_voltage_chunks():
 	sql = "SELECT id,voltage,car_id,timestamp FROM voltage"
 	sql += " WHERE timestamp BETWEEN %s AND %s;"
-	params = ((datetime.utcnow()-timedelta(minutes=60)).strftime('%Y-%m-%dT%H:%M'),
+	params = ((datetime.utcnow()-timedelta(minutes=15)).strftime('%Y-%m-%dT%H:%M'),
 			  datetime.utcnow().strftime('%Y-%m-%dT%H:%M'),)
 
 	db_results = pd.read_sql(sql=sql,con=conn,params=params)

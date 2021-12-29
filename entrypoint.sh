@@ -14,6 +14,8 @@ content_server='server {\n'
 content_server=$content_server"    listen ${USE_LISTEN_PORT};\n"
 content_server=$content_server'    location / {\n'
 content_server=$content_server'        try_files $uri @app;\n'
+content_server=$content_server'        proxy_read_timeout 300s;\n'
+content_server=$content_server'        proxy_connect_timeout 75s;\n'
 content_server=$content_server'    }\n'
 content_server=$content_server'    location @app {\n'
 content_server=$content_server'        include uwsgi_params;\n'
@@ -21,11 +23,15 @@ content_server=$content_server'        uwsgi_pass unix:///tmp/uwsgi.sock;\n'
 content_server=$content_server'    }\n'
 content_server=$content_server"    location $USE_STATIC_URL {\n"
 content_server=$content_server"        alias $USE_STATIC_PATH;\n"
+content_server=$content_server'        proxy_read_timeout 300s;\n'
+content_server=$content_server'        proxy_connect_timeout 75s;\n'
 content_server=$content_server'    }\n'
 # If STATIC_INDEX is 1, serve / with /static/index.html directly (or the static URL configured)
 if [ "$STATIC_INDEX" = 1 ] ; then
 content_server=$content_server'    location = / {\n'
 content_server=$content_server"        index $USE_STATIC_URL/index.html;\n"
+content_server=$content_server'        proxy_read_timeout 300s;\n'
+content_server=$content_server'        proxy_connect_timeout 75s;\n'
 content_server=$content_server'    }\n'
 fi
 content_server=$content_server'}\n'
