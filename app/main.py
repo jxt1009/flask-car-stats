@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-
+import sys
 import flask
 import pymysql
 from flask import render_template
@@ -15,8 +15,8 @@ conn = pymysql.connect(host="10.0.0.147",
 app = flask.Flask(__name__, static_url_path='',
 				  static_folder='static',
 				  template_folder='template')
-
-app.config["DEBUG"] = True
+if "dev" in sys.argv:
+	app.config["DEBUG"] = True
 
 # Global mapping variables
 R1 = 8800
@@ -41,7 +41,7 @@ def post_voltage(voltage):
 def get_voltage_chunks():
 	sql = "SELECT id,voltage,car_id,timestamp FROM voltage"
 	sql += " WHERE timestamp BETWEEN %s AND %s;"
-	params = ((datetime.utcnow()-timedelta(minutes=15)).strftime('%Y-%m-%dT%H:%M'),
+	params = ((datetime.utcnow()-timedelta(minutes=60)).strftime('%Y-%m-%dT%H:%M'),
 			  datetime.utcnow().strftime('%Y-%m-%dT%H:%M'),)
 
 	db_results = pd.read_sql(sql=sql,con=conn,params=params)
@@ -63,4 +63,4 @@ def get_voltage_chart():
 
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', port=5000)
+	app.run(host='0.0.0.0', port=5000, threaded=True)
