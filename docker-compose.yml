@@ -4,6 +4,8 @@ services:
     image: "jtoper/dev-python-webserver:latest"
     ports:
       - "82:80"
+    deploy:
+      replicas: 1
     depends_on:
       - db
     links:
@@ -13,6 +15,8 @@ services:
     image: "jtoper/stg-python-webserver:latest"
     ports:
       - "81:80"
+    deploy:
+      replicas: 1
     depends_on:
       - db
     links:
@@ -22,6 +26,8 @@ services:
     image: "jtoper/python-webserver:latest"
     ports:
       - "80:80"
+    deploy:
+      replicas: 1
     depends_on:
       - db
     links:
