@@ -13,13 +13,24 @@ Voltage Graph Test
 
 			var volts = [];
 			var avg_volts = [];
+			var chart_view_time=30;
 
-			$.getJSON("/voltage-chart", addData);
+			getChartData();
+
+
+			document.getElementById('time').onchange = function() {
+				changeTimeFrame(this.value);
+			};
+			function changeTimeFrame(time){
+				chart_view_time = time;
+				getChartData();
+			}
+
 			var chart = new CanvasJS.Chart("chartContainer", {
 				animationEnabled: true,
 				theme: "light2",
 				title: {
-					text: "Battery Charge Status"
+					text: "{{ chart_title }}"
 				},
 				toolTip: {
 					shared: true
@@ -78,9 +89,13 @@ Voltage Graph Test
 			}
 
 			setInterval(function(){
-				$.getJSON("/voltage-chart", addData);
+					getChartData();
 				},
 				10000);
+
+			function getChartData(){
+				$.getJSON("/voltage-chart/"+chart_view_time, addData);
+			}
 
 			function toggleDataSeries(e){
 				if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
@@ -99,6 +114,16 @@ Voltage Graph Test
 </head>
 <body>
 	<div id="body-content">
+		<form id="time-select">
+			<label>Timeframe:
+				<select name="time" id="time">
+					<option value="30">30m</option>
+					<option value="60">60m</option>
+					<option value="90">90m</option>
+					<option value="120">120m</option>
+				</select>
+			</label>
+		</form>
 		<div id="chartContainer" style="height: 300px; width: 100%;"></div>
 	</div>
 </body>
