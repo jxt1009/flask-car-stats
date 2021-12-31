@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 import sys
 import flask
 import pymysql
@@ -10,7 +9,6 @@ conn = pymysql.connect(host="10.0.0.147",
 					   user="test",
 					   password="root",
 					   database="car_stats")
-
 
 app = flask.Flask(__name__, static_url_path='',
 				  static_folder='static',
@@ -38,28 +36,34 @@ def post_voltage(voltage):
 
 
 # Get the chunks of time series data from the SQL db
-def get_voltage_chunks():
-	sql = "SELECT id,voltage,car_id,timestamp FROM voltage"
-	sql += " WHERE timestamp BETWEEN %s AND %s;"
-	params = ((datetime.utcnow()-timedelta(minutes=60)).strftime('%Y-%m-%dT%H:%M'),
-			  datetime.utcnow().strftime('%Y-%m-%dT%H:%M'),)
+def get_voltage_chunks(view_time):
+	sql = "SELECT id,voltage,car_id,timestamp FROM voltage order by id desc limit %(view_time)s;"
 
-	db_results = pd.read_sql(sql=sql,con=conn,params=params)
-	db_results['voltage'] = db_results.voltage.apply(lambda x: x * ((R2+R1)/R2))
+	if view_time is None:
+		view_time = 60
+	else:
+		view_time = int(view_time)
+
+	db_results = pd.read_sql(sql=sql, con=conn, params={"view_time": view_time})
+	db_results['voltage'] = db_results.voltage.apply(lambda x: x * ((R2 + R1) / R2))
 	db_results['voltage_avg'] = db_results.voltage.expanding().mean()
+
 	return db_results
 
 
 # Display the homepage
 @app.route("/")
 def homepage():
-	return render_template("index.html", title="Voltage Chart Test")
+	return render_template("index.html", title="Voltage Chart Test", chart_title="12V Battery Charge Status")
 
 
 @app.route("/voltage-chart")
-def get_voltage_chart():
-	chunks = get_voltage_chunks()
-	return chunks.to_json(orient="records")
+@app.route("/voltage-chart/<view_time>")
+def get_voltage_chart(view_time=None):
+	chunks = get_voltage_chunks(view_time)
+	json_output = chunks.to_json(orient="records")
+
+	return json_output
 
 
 if __name__ == '__main__':
